@@ -1,0 +1,105 @@
+{% extends "students/base.html" %}
+{% load static %}
+
+{% block meta_title %}Students{% endblock meta_title%}
+{% block title %}Students Base{% endblock title %}
+{% block btn_title %}Add student{% endblock btn_title %}
+
+{% block content%}
+
+<!--Add Student Button-->
+<a class="btn btn-primary" href="{% url 'students_add' %}" role="button">Add Student</a>
+
+<!--Students Listing-->
+<table class="table table-hover table-striped">
+    {% with order_by=request.GET.order_by reverse=request.GET.reverse %}
+    <thead>
+    <tr>
+        <th>№</th>
+        <th>Photo</th>
+        <th>
+            <a href="{% url 'home' %}?order_by=first_name{% if order_by == 'first_name' and reverse != '1' %}&amp;reverse=1{% endif %}">
+                First name
+                {% if order_by == 'first_name' and reverse != '1' %}&uarr;
+                {% elif order_by == 'first_name' and reverse == '1' %}&darr;
+                {% endif %}
+            </a>
+        </th>
+        <th>
+            <a href="{% url 'home' %}?order_by=last_name{% if order_by == 'last_name' and reverse != '1' %}&amp;reverse=1{% endif %}">
+                Last name
+                {% if order_by == 'last_name' and reverse != '1' %}&uarr;
+                {% elif order_by == 'last_name' and reverse == '1' %}&darr;
+                {% endif %}
+            </a>
+        </th>
+        <th>
+            <a href="{% url 'home' %}?order_by=ticket{% if order_by == 'ticket' and reverse != '1' %}&amp;reverse=1{% endif %}">
+                Ticket №
+                {% if order_by == 'ticket' and reverse != '1' %}&uarr;
+                {% elif order_by == 'ticket' and reverse == '1' %}&darr;
+                {% endif %}
+            </a>
+        </th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    {% endwith %}
+    <tbody>
+    {% for student in students %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>
+            {% if student.photo %}
+                <img src="{{ student.photo.url }}" height="35" width="35" class="rounded-circle">
+            {% else %}
+                <img src="{% static 'img/bruh.png' %}" height="35" width="35" class="rounded-circle">
+            {% endif %}
+        </td>
+        <td><a title="Edit" href="{% url 'students_edit' student.id %}">{{ student.first_name }}</a></td>
+        <td><a title="Edit" href="{% url 'students_edit' student.id %}">{{ student.last_name }}</a></td>
+        <td>{{ student.ticket }}</td>
+        <td>
+            <div class="dropdown">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    Action
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="{% url 'students_edit' student.id %}">Edit</a>
+                    <a class="dropdown-item" href="/journal/1">Attendance</a>
+                    <a class="dropdown-item" href="{% url 'students_delete' student.id %}">Delete</a>
+                </div>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if students.has_other_pages %}
+    {% with order_by=request.GET.order_by reverse=request.GET.reverse %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link" href="{% url 'home' %}?page=1&amp;order_by={{ order_by }}&amp;reverse={{ reverse }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                {% for p in students.paginator.page_range %}
+                <li class="page-item {% if students.number == p %}active{% endif %}">
+                    <a class="page-link" href="{% url 'home' %}?page={{ p }}&amp;order_by={{ order_by }}&amp;reverse={{ reverse }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+
+                <li>
+                    <a class="page-link" href="{% url 'home' %}?page={{ students.paginator.num_pages }}&amp;order_by={{ order_by }}&amp;reverse={{ reverse }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    {% endwith %}
+{% endif %}
+
+{% endblock content %}
